@@ -2,10 +2,14 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/node_modules/.prisma" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules/@prisma" />
     </content>
+    <content url="file://$MODULE_DIR$/node_modules/.pnpm/@prisma+client@5.8.1_prisma@5.8.1" />
+    <content url="file://$MODULE_DIR$/node_modules/@prisma" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

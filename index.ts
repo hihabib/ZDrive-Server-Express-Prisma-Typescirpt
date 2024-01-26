@@ -1,6 +1,8 @@
 import http from 'http'
-import app from './app/app'
-import 'dotenv/config'
+import app from './src/app/app'
+import * as dotenv from 'dotenv'
+
+dotenv.config();
 
 const port = process.env.PORT ?? 8080
 
