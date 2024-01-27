@@ -8,4 +8,6 @@ const router = Router();
 router.get("/getItems/*", authenticate, controller.getItems)
 router.get("/getItems", authenticate, controller.getItems)
 
+// create new directory
+router.get("/createDirectory/*", authenticate, controller.createDirectoryByUser);
 export default router

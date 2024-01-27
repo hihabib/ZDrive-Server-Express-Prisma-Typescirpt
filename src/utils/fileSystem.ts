@@ -1,9 +1,28 @@
+import {Request} from "express";
 import fs from "fs";
 import {TItems} from "../types/items";
 import path from "path";
 import {PrismaClient} from '@prisma/client'
 
 const prisma = new PrismaClient();
+
+/**
+ * Get route of user uploaded data from file system by express Request.
+ * Authentication is required
+ * @param req
+ */
+export const getRouteFs = (req: Request): string => {
+    if (req.user === undefined) {
+        throw new Error("Unauthorized")
+    }
+    let route = req.params[0] as (string | undefined);
+    if (route === undefined) {
+        route = path.resolve('uploads', 'userData', req.user.username)
+    } else {
+        route = path.resolve('uploads', 'userData', req.user.username, path.join(...route.split("/")))
+    }
+    return route;
+}
 
 /**
  * get file and directory list by directory path
