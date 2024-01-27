@@ -135,6 +135,11 @@ export const createDirectory = async (newDirPath: string, username: string, hasP
         }
     }
 }
+
+/**
+ * Get sub or inner directories id
+ * @param id
+ */
 const getSubDirectoriesById = async (id: number) => {
     const directories = await prisma.directory.findUnique({
         where: {
@@ -182,7 +187,11 @@ export const getDirectoryPathById = async (id: number) => {
     return path.resolve("uploads", "userData", ...directories.reverse())
 }
 
-export const getSubDirectoryIdsRecursive = async (id: number) => {
+/**
+ * Get all ids of all subdirectories / inner directories recursively by id
+ * @param id
+ */
+export const getSubDirectoriesIdRecursively = async (id: number) => {
     const ids: number[] = [];
     await (async function getIds(id: number) {
         const directories = await getSubDirectoriesById(id);
@@ -191,6 +200,42 @@ export const getSubDirectoryIdsRecursive = async (id: number) => {
             await getIds(directory.id)
         }
     })(id);
-    console.log(ids)
+    return ids
+}
+
+/**
+ * Get all files id by directory id
+ * @param dirId
+ */
+export const getFilesId = async (dirId: number) => {
+    const files = await prisma.directory.findUnique({
+        where: {
+            id: dirId
+        },
+        select: {
+            File: true
+        }
+    });
+    if (files === null) {
+        return [];
+    }
+
+    const filesId: number[] = []
+    for (const file of files.File) {
+        filesId.push(file.id)
+    }
+    return filesId
+}
+
+export const getFilesIdRecursively = async (dirId: number) => {
+    const allFilesId = await getFilesId(dirId);
+    const allDirsId = await getSubDirectoriesIdRecursively(dirId);
+
+    // collect all files id recursively
+    for (const id of allDirsId) {
+        const filesId = await getFilesId(id);
+        allFilesId.push(...filesId)
+    }
+    return allFilesId
 }
 

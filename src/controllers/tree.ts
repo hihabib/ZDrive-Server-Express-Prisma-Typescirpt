@@ -68,9 +68,15 @@ export const deleteDirectoryById = (req: Request, res: Response, next: NextFunct
     (async () => {
         try {
             const {id} = req.params;
-            const isDeleted = await service.deleteDirectoryById(Number(id))
-            res.status(200).json({
-                message: "Directory is deleted successfully"
+            const isDeleted = await service.deleteDirectoryById(Number(id));
+            if (isDeleted) {
+                return res.status(200).json({
+                    message: "Directory is deleted successfully"
+                })
+            }
+
+            return res.status(500).json({
+                message: "Directory is not deleted successfully"
             })
         } catch (error) {
             if (error instanceof Error) {
