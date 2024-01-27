@@ -22,17 +22,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-const http_1 = __importDefault(require("http"));
-const app_1 = __importDefault(require("./src/app/app"));
-const dotenv = __importStar(require("dotenv"));
-dotenv.config();
-const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 8080;
-const server = http_1.default.createServer(app_1.default);
-server.listen(port, () => {
-    console.log(`server is listening to ${port} port`);
-});
+const express_1 = require("express");
+const controller = __importStar(require("../controllers/tree"));
+const authenticate_1 = require("../middlewares/authenticate");
+const router = (0, express_1.Router)();
+router.get("/getItems", authenticate_1.authenticate, controller.getItems);
+exports.default = router;

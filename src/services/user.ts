@@ -4,6 +4,7 @@ import {BCRYPT_SALT_ROUNDS} from "../app/constants";
 import * as fs from "fs";
 import * as jwt from 'jsonwebtoken'
 import {TUser} from "../types/user";
+import path from "path";
 
 const prisma = new PrismaClient()
 
@@ -15,25 +16,36 @@ const prisma = new PrismaClient()
  * @param password
  */
 export const saveUser = async (name: string, username: string, email: string, password: string) => {
-    // hash password with bcrypt
-    const hashed = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-    // create user and return
-    return prisma.user.create({
-        data: {
-            name,
-            username,
-            email,
-            password: hashed
-        },
-        select: {
-            id: true,
-            name: true,
-            username: true,
-            email: true,
+    try {
+        // hash password with bcrypt
+        const hashed = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+
+        // create user and return
+        const user = await prisma.user.create({
+            data: {
+                name,
+                username,
+                email,
+                password: hashed
+            },
+            select: {
+                id: true,
+                name: true,
+                username: true,
+                email: true,
+            }
+        })
+
+        // create new folder
+        const newDirPath = path.resolve('uploads', 'userData', username)
+        await fs.promises.mkdir(newDirPath, {recursive: true})
+        return user
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(error.message)
         }
-    })
-
+    }
 }
 
 /**
@@ -43,34 +55,40 @@ export const saveUser = async (name: string, username: string, email: string, pa
  */
 export const login = async (username: string, password: string): Promise<{
     token: string
-} | { error: string }> => {
-    const user = await prisma.user.findUnique({
-        where: {
-            username
-        },
-        select: {
-            id: true,
-            username: true,
-            name: true,
-            email: true,
-            password: true
+} | { error: string } | undefined> => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                username
+            },
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                email: true,
+                password: true
+            }
+        })
+
+        // stop if no user found with corresponding username
+        if (user === null) {
+            return {error: "no user found"};
         }
-    })
 
-    // stop if no user found with corresponding username
-    if (user === null) {
-        return {error: "no user found"};
+        // check password
+        const isMatched = await bcrypt.compare(password, user.password)
+        if (!isMatched) {
+            return {error: "no user found"}
+        }
+        // delete password before sending
+        const responseUser = user as TUser
+        delete responseUser.password;
+
+        const privateKey = fs.readFileSync('private.key');
+        return {token: jwt.sign(responseUser, privateKey, {algorithm: 'RS256'})};
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(error.message)
+        }
     }
-
-    // check password
-    const isMatched = await bcrypt.compare(password, user.password)
-    if (!isMatched) {
-        return {error: "no user found"}
-    }
-    // delete password before sending
-    const responseUser = user as TUser
-    delete responseUser.password;
-
-    const privateKey = fs.readFileSync('private.key');
-    return {token: jwt.sign(responseUser, privateKey, {algorithm: 'RS256'})};
 }

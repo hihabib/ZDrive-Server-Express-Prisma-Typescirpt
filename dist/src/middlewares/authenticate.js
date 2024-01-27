@@ -25,14 +25,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-const http_1 = __importDefault(require("http"));
-const app_1 = __importDefault(require("./src/app/app"));
-const dotenv = __importStar(require("dotenv"));
-dotenv.config();
-const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 8080;
-const server = http_1.default.createServer(app_1.default);
-server.listen(port, () => {
-    console.log(`server is listening to ${port} port`);
-});
+exports.authenticate = void 0;
+const jwt = __importStar(require("jsonwebtoken"));
+const fs_1 = __importDefault(require("fs"));
+const authenticate = (req, res, next) => {
+    if (req.headers.authorization === undefined || !req.headers.authorization.startsWith('bearer ')) {
+        return next("Unauthorized");
+    }
+    const token = req.headers.authorization.split(" ")[1];
+    const privateKey = fs_1.default.readFileSync('private.key');
+    req.user = jwt.verify(token, privateKey);
+    if (req.user === undefined) {
+        return next("Unauthorized");
+    }
+    next();
+};
+exports.authenticate = authenticate;
