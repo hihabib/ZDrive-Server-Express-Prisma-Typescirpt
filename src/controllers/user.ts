@@ -1,9 +1,14 @@
-import {Request, Response} from 'express'
+import {NextFunction, Request, Response} from 'express'
 import {TUser} from "../types/user";
 import * as service from '../services/user'
 
-// user registration
-export const registration = (req: Request, res: Response) => {
+/**
+ * User registration Controller
+ * @param req
+ * @param res
+ * @param next
+ */
+export const registration = (req: Request, res: Response, next: NextFunction) => {
     (async () => {
         try {
             const {
@@ -20,14 +25,19 @@ export const registration = (req: Request, res: Response) => {
             }
         } catch (error) {
             if (error instanceof Error) {
-                throw new Error(error.message)
+                next(error)
             }
         }
     })()
 }
 
-// user login
-export const login = (req: Request, res: Response) => {
+/**
+ * User login controller
+ * @param req
+ * @param res
+ * @param next
+ */
+export const login = (req: Request, res: Response, next: NextFunction) => {
     (async () => {
         try {
             const {
@@ -37,7 +47,7 @@ export const login = (req: Request, res: Response) => {
             res.status(200).json(await service.login(username, password))
         } catch (error) {
             if (error instanceof Error) {
-                throw new Error(error.message)
+                next(error)
             }
         }
     })()

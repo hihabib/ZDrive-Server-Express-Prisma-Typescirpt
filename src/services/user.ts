@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as jwt from 'jsonwebtoken'
 import {TUser} from "../types/user";
 import path from "path";
-import {createDirectory} from "../utils/fileSystem";
+import {createDirectory} from "../utils/tree";
 
 const prisma = new PrismaClient()
 
@@ -38,9 +38,9 @@ export const saveUser = async (name: string, username: string, email: string, pa
             }
         })
 
-        // create new directory
+        // create new directory for new user
         const newDirPath = path.resolve('uploads', 'userData', username)
-        await createDirectory(newDirPath, username)
+        await createDirectory(newDirPath, username, false)
         return user
     } catch (error) {
         if (error instanceof Error) {

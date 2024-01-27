@@ -19,3 +19,6 @@ export type TItems = {
     files?: string[]
     directories?: string[]
 }
+export type TDirRef = {
+    id: number
+}

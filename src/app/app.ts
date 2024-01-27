@@ -10,7 +10,9 @@ app.use(router)
 //error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error(err)
-    res.status(500).send('Something broke!')
+    res.status(500).json({
+        message: err.message ?? err
+    })
 })
 
 export default app
