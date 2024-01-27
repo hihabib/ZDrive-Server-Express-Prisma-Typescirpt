@@ -21,7 +21,7 @@ export const registration = (req: Request, res: Response, next: NextFunction) =>
                 // save user and response
                 res.status(201).json(await service.saveUser(name, username, email, password))
             } else {
-                res.status(401).json({message: "necessary data is missing"})
+                res.status(400).json({message: "necessary data is missing"})
             }
         } catch (error) {
             if (error instanceof Error) {

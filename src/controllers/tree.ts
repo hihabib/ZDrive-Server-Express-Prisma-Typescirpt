@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from "express";
-import {createDirectory, getItemsFromFs, getRouteFs} from "../utils/tree";
+import {createDirectory, getRouteFs} from "../utils/tree";
 import fs from "fs";
 import * as service from '../services/tree'
 
@@ -14,11 +14,14 @@ export const getItems = (req: Request, res: Response, next: NextFunction) => {
 
     (async () => {
         try {
-            const items = await getItemsFromFs(route);
-            if (items === undefined) {
-                next("Items not found")
+            const items = await service.getItemsByRoute(route);
+            if (items === null) {
+                return res.status(404).json("Items not found")
             }
-            res.status(200).json(items)
+            if (items === undefined) {
+                return res.status(501).json("Something went wrong")
+            }
+            return res.status(200).json(items)
         } catch (error) {
             if (error instanceof Error) {
                 next(error)
@@ -50,7 +53,9 @@ export const createDirectoryByUser = (req: Request, res: Response, next: NextFun
             // create directory here
             const isCreated = await createDirectory(route, (req.user!).username)
             if (!isCreated) {
-                return next("Directory is not created successfully")
+                return res.status(400).json({
+                    message: "Directory is not created successfully"
+                })
             }
             return res.status(201).json({
                 message: "Directory is created successfully"
