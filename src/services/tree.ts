@@ -18,7 +18,7 @@ export const deleteDirectoryById = async (id: number) => {
         const dirsId = [id, ...await getSubDirectoriesIdRecursively(id)];
 
         // delete files reference from database
-        const fileDeleted = await prisma.file.deleteMany({
+        await prisma.file.deleteMany({
             where: {
                 id: {
                     in: filesId
@@ -26,17 +26,17 @@ export const deleteDirectoryById = async (id: number) => {
             }
         })
         // delete directories reference from database
-        const dirsDeleted = await prisma.directory.deleteMany({
+        await prisma.directory.deleteMany({
             where: {
                 id: {
                     in: dirsId
                 }
             }
         });
-        console.log("path:", directoryPath)
+
+        // delete files and directories from file system
         await fs.promises.rm(directoryPath, {recursive: true, force: true})
-        console.log("files", fileDeleted)
-        console.log("directories", dirsDeleted)
+
         return true
     } catch (error) {
         if (error instanceof Error) {
