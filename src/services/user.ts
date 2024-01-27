@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as jwt from 'jsonwebtoken'
 import {TUser} from "../types/user";
 import path from "path";
+import {createDirectory} from "../utils/fileSystem";
 
 const prisma = new PrismaClient()
 
@@ -21,7 +22,7 @@ export const saveUser = async (name: string, username: string, email: string, pa
         // hash password with bcrypt
         const hashed = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-        // create user and return
+        // create user
         const user = await prisma.user.create({
             data: {
                 name,
@@ -37,9 +38,9 @@ export const saveUser = async (name: string, username: string, email: string, pa
             }
         })
 
-        // create new folder
+        // create new directory
         const newDirPath = path.resolve('uploads', 'userData', username)
-        await fs.promises.mkdir(newDirPath, {recursive: true})
+        await createDirectory(newDirPath, username)
         return user
     } catch (error) {
         if (error instanceof Error) {
