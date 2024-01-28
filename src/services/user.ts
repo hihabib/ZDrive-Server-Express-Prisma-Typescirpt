@@ -1,5 +1,5 @@
 import {PrismaClient} from '@prisma/client'
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import {BCRYPT_SALT_ROUNDS} from "../app/constants";
 import * as fs from "fs";
 import * as jwt from 'jsonwebtoken'
@@ -20,7 +20,8 @@ export const saveUser = async (name: string, username: string, email: string, pa
 
     try {
         // hash password with bcrypt
-        const hashed = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+        const salt = bcrypt.genSaltSync(BCRYPT_SALT_ROUNDS);
+        const hashed = bcrypt.hashSync(password, salt);
 
         // create user
         const user = await prisma.user.create({
@@ -77,7 +78,7 @@ export const login = async (username: string, password: string): Promise<{
         }
 
         // check password
-        const isMatched = await bcrypt.compare(password, user.password)
+        const isMatched = bcrypt.compareSync(password, user.password)
         if (!isMatched) {
             return {error: "no user found"}
         }
@@ -85,7 +86,7 @@ export const login = async (username: string, password: string): Promise<{
         const responseUser = user as TUser
         delete responseUser.password;
 
-        const privateKey = fs.readFileSync('private.key');
+        const privateKey = fs.readFileSync(path.resolve('private.key'));
         return {token: jwt.sign(responseUser, privateKey, {algorithm: 'RS256'})};
     } catch (error) {
         if (error instanceof Error) {

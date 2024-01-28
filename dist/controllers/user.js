@@ -31,20 +31,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registration = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const constants_1 = require("../app/constants");
+exports.login = exports.registration = void 0;
 const service = __importStar(require("../services/user"));
-const registration = (req, res) => {
+/**
+ * User registration Controller
+ * @param req
+ * @param res
+ * @param next
+ */
+const registration = (req, res, next) => {
     (() => __awaiter(void 0, void 0, void 0, function* () {
-        const { name, username, password, email } = req.body;
-        const hashed = yield bcrypt_1.default.hash(password, constants_1.BCRYPT_SALT_ROUNDS);
-        // save user and response
-        res.status(201).json(yield service.saveUser(name, username, email, hashed));
+        try {
+            const { name, username, password, email } = req.body;
+            if (name !== undefined && username !== undefined && password !== undefined && email !== undefined) {
+                // save user and response
+                res.status(201).json(yield service.saveUser(name, username, email, password));
+            }
+            else {
+                res.status(400).json({ message: "necessary data is missing" });
+            }
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                next(error);
+            }
+        }
     }))();
 };
 exports.registration = registration;
+/**
+ * User login controller
+ * @param req
+ * @param res
+ * @param next
+ */
+const login = (req, res, next) => {
+    (() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { username, password } = req.body;
+            res.status(200).json(yield service.login(username, password));
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                next(error);
+            }
+        }
+    }))();
+};
+exports.login = login;

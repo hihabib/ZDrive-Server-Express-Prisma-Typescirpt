@@ -34,25 +34,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.registration = void 0;
 const service = __importStar(require("../services/user"));
-// user registration
-const registration = (req, res) => {
+/**
+ * User registration Controller
+ * @param req
+ * @param res
+ * @param next
+ */
+const registration = (req, res, next) => {
     (() => __awaiter(void 0, void 0, void 0, function* () {
-        const { name, username, password, email } = req.body;
-        if (name !== undefined && username !== undefined && password !== undefined && email !== undefined) {
-            // save user and response
-            res.status(201).json(yield service.saveUser(name, username, email, password));
+        try {
+            const { name, username, password, email } = req.body;
+            if (name !== undefined && username !== undefined && password !== undefined && email !== undefined) {
+                // save user and response
+                res.status(201).json(yield service.saveUser(name, username, email, password));
+            }
+            else {
+                res.status(400).json({ message: "necessary data is missing" });
+            }
         }
-        else {
-            res.status(401).json({ message: "necessary data is missing" });
+        catch (error) {
+            if (error instanceof Error) {
+                next(error);
+            }
         }
     }))();
 };
 exports.registration = registration;
-// user login
-const login = (req, res) => {
+/**
+ * User login controller
+ * @param req
+ * @param res
+ * @param next
+ */
+const login = (req, res, next) => {
     (() => __awaiter(void 0, void 0, void 0, function* () {
-        const { username, password } = req.body;
-        res.status(200).json(yield service.login(username, password));
+        try {
+            const { username, password } = req.body;
+            res.status(200).json(yield service.login(username, password));
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                next(error);
+            }
+        }
     }))();
 };
 exports.login = login;

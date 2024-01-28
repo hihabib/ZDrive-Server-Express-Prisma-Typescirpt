@@ -119,6 +119,7 @@
     // include your types directory
   ],
   "include": [
+	"./",
     "src/**/*",
     "src/types/**/*"
   ]

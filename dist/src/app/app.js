@@ -12,7 +12,10 @@ app.use((0, cors_1.default)());
 app.use(routes_1.default);
 //error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+    var _a;
+    console.error(err);
+    res.status(500).json({
+        message: (_a = err.message) !== null && _a !== void 0 ? _a : err
+    });
 });
 exports.default = app;

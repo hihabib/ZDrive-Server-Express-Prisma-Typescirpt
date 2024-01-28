@@ -27,4 +27,5 @@ const express_1 = require("express");
 const controller = __importStar(require("../controllers/user"));
 const router = (0, express_1.Router)();
 router.post("/registration", controller.registration);
+router.post("/login", controller.login);
 exports.default = router;
