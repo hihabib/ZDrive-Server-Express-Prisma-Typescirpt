@@ -56,7 +56,8 @@ export const saveUser = async (name: string, username: string, email: string, pa
  * @param password
  */
 export const login = async (username: string, password: string): Promise<{
-    token: string
+    token: string,
+    user: TUser
 } | { error: string } | undefined> => {
     try {
         const user = await prisma.user.findUnique({
@@ -87,7 +88,10 @@ export const login = async (username: string, password: string): Promise<{
         delete responseUser.password;
 
         const privateKey = fs.readFileSync(path.resolve('private.key'));
-        return {token: jwt.sign(responseUser, privateKey, {algorithm: 'RS256'})};
+        return {
+            token: jwt.sign(responseUser, privateKey, {algorithm: 'RS256'}),
+            user: responseUser
+        };
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(error.message)

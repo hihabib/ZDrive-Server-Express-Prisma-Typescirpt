@@ -128,7 +128,7 @@ export const createDirectory = async (newDirPath: string, username: string, hasP
 
         // create directory ref in file system in '__ref__' file
         await fs.promises.appendFile(path.resolve(newDirPath, '__ref__'), JSON.stringify({id: directory.id}))
-        return true
+        return directory
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(error.message);

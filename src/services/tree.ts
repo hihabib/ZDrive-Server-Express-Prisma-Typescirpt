@@ -7,6 +7,7 @@ import {
 import fs from "fs";
 import path from "path";
 import {TDirRef} from "../types/items";
+import {TError} from "../types/error";
 
 const prisma = new PrismaClient();
 
@@ -14,8 +15,8 @@ const prisma = new PrismaClient();
  * Get directory details by id
  * @param id
  */
-export const getItemsById = (id: number) => {
-    return prisma.directory.findUnique({
+export const getItemsById = async (id: number) => {
+    const items = await prisma.directory.findUnique({
         where: {
             id
         },
@@ -33,10 +34,23 @@ export const getItemsById = (id: number) => {
             ParentDir: true,
             createdAt: true,
             updatedAt: true,
-            File: true,
+            File: {
+                select: {
+                    id: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    name: true,
+                    userId: true,
+                    directoryId: true
+                }
+            },
             Directory: true
         }
     })
+    if (items === null) {
+        return {errorMessage: "no such directory"} as TError
+    }
+    return items;
 }
 
 /**
@@ -45,9 +59,13 @@ export const getItemsById = (id: number) => {
  */
 export const getItemsByRoute = async (route: string) => {
     try {
-        // get the directory id from __ref__ file
-        const {id} = JSON.parse(await fs.promises.readFile(path.resolve(route, '__ref__'), 'utf-8')) as TDirRef;
-        return getItemsById(id);
+        if (fs.existsSync(path.resolve(route, '__ref__'))) {
+
+            // get the directory id from __ref__ file
+            const {id} = JSON.parse(await fs.promises.readFile(path.resolve(route, '__ref__'), 'utf-8')) as TDirRef;
+            return getItemsById(id);
+        }
+        return {errorMessage: "no such directory"} as TError
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(error.message)
@@ -86,7 +104,10 @@ export const deleteDirectoryById = async (id: number) => {
         });
 
         // delete files and directories from file system
-        await fs.promises.rm(directoryPath, {recursive: true, force: true})
+        await fs.promises.rm(directoryPath, {
+            recursive: true,
+            force: true
+        })
 
         return true
     } catch (error) {
